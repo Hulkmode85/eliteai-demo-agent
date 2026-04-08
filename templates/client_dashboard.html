@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ client.clinic_name }} — AI Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: #16161f;
+            --bg-card-alt: #1c1c28;
+            --text: #f0f0f5;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6b6b80;
+            --accent: #6366f1;
+            --accent-2: #8b5cf6;
+            --gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --border: rgba(255,255,255,0.06);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: 260px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-clinic {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: rgba(99,102,241,0.1);
+            color: var(--text);
+        }
+
+        .sidebar-nav a.active { color: var(--accent); }
+
+        .sidebar-footer {
+            margin-top: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Main */
+        .main {
+            margin-left: 260px;
+            padding: 32px 40px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .page-header .date {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .badge-plan {
+            display: inline-block;
+            background: var(--gradient);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Stat cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-card .change {
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .change-up { color: var(--success); }
+        .change-down { color: var(--danger); }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        .chart-card h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Leads table */
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table-header h3 { font-size: 1rem; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 24px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card-alt);
+        }
+
+        td {
+            padding: 14px 24px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover { background: rgba(99,102,241,0.03); }
+
+        .score-pill {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: white;
+        }
+
+        .sp-high { background: var(--success); }
+        .sp-mid { background: var(--warning); }
+        .sp-low { background: var(--danger); }
+
+        .tier-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .tt-priority { background: rgba(16,185,129,0.15); color: var(--success); }
+        .tt-nurture { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .tt-redirect { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+        .btn {
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-accent {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-accent:hover { opacity: 0.9; }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--text-muted);
+        }
+
+        .empty-state p { margin-bottom: 16px; }
+
+        /* Activity feed */
+        .activity-feed {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .ad-green { background: var(--success); }
+        .ad-yellow { background: var(--warning); }
+        .ad-blue { background: var(--accent); }
+
+        .activity-text { font-size: 0.85rem; color: var(--text-secondary); }
+        .activity-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 20px; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo">EliteAI</div>
+        <div class="sidebar-clinic">{{ client.clinic_name }}</div>
+        <nav class="sidebar-nav">
+            <a href="#" class="active">Dashboard</a>
+            <a href="#leads-section">Leads</a>
+            <a href="#activity-section">Activity</a>
+        </nav>
+        <div class="sidebar-footer">
+            <span class="badge-plan">{{ client.plan | upper }}</span>
+            <div style="margin-top:8px;">Powered by EliteAI Solutions</div>
+        </div>
+    </aside>
+
+    <div class="main">
+        <div class="page-header">
+            <div>
+                <h1>Welcome back</h1>
+                <div class="date">{{ client.clinic_name }} &mdash; AI Performance Dashboard</div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Total Leads</div>
+                <div class="value" id="totalLeads">{{ leads | length }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Priority Leads</div>
+                <div class="value" style="color:var(--success)" id="priorityLeads">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Avg Score</div>
+                <div class="value" id="avgScore">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Emails Sent</div>
+                <div class="value" id="emailsSent">{{ emails | length }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">AI Response Rate</div>
+                <div class="value" style="color:var(--success)">100%</div>
+                <div class="change change-up">Every lead gets an instant response</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Lead Score Distribution</h3>
+                <canvas id="scoreChart" height="200"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Lead Tiers</h3>
+                <canvas id="tierChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Leads Table -->
+        <div class="table-card" id="leads-section">
+            <div class="table-header">
+                <h3>Recent Leads ({{ leads | length }})</h3>
+                <button class="btn btn-ghost" onclick="location.reload()">Refresh</button>
+            </div>
+            {% if leads %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Inquiry</th>
+                        <th>Score</th>
+                        <th>Tier</th>
+                        <th>Follow-up</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads | reverse %}
+                    <tr>
+                        <td>
+                            <strong>{{ lead.patient_name }}</strong>
+                            {% if lead.email %}<br><span style="font-size:0.8rem;color:var(--text-muted)">{{ lead.email }}</span>{% endif %}
+                        </td>
+                        <td>{{ lead.inquiry_type | replace('_', ' ') | title }}</td>
+                        <td>
+                            <span class="score-pill {{ 'sp-high' if lead.score >= 8 else ('sp-mid' if lead.score >= 5 else 'sp-low') }}">
+                                {{ lead.score }}/10
+                            </span>
+                        </td>
+                        <td>
+                            <span class="tier-tag {{ 'tt-priority' if lead.response_tier == 'priority' else ('tt-nurture' if lead.response_tier == 'nurture' else 'tt-redirect') }}">
+                                {{ lead.response_tier }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if lead.get('follow_up_count', 0) > 0 %}
+                                <span style="color:var(--success)">{{ lead.follow_up_count }}x sent</span>
+                            {% else %}
+                                <span style="color:var(--text-muted)">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td style="color:var(--text-muted);font-size:0.85rem">{{ lead.timestamp[:10] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <p>No leads yet. Your AI is ready and waiting for inquiries.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="chart-card" style="margin-top:20px" id="activity-section">
+            <h3>Recent AI Activity</h3>
+            <div class="activity-feed">
+                {% for email in emails | reverse %}
+                <div class="activity-item">
+                    <div class="activity-dot ad-blue"></div>
+                    <div>
+                        <div class="activity-text">{{ email.type | replace('_', ' ') | title }} to {{ email.to }}</div>
+                        <div class="activity-time">{{ email.timestamp[:16] | replace('T', ' ') }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% for lead in leads | reverse %}
+                <div class="activity-item">
+                    <div class="activity-dot {{ 'ad-green' if lead.score >= 8 else 'ad-yellow' }}"></div>
+                    <div>
+                        <div class="activity-text">Lead scored: {{ lead.patient_name }} ({{ lead.score }}/10) &mdash; {{ lead.score_reason }}</div>
+                        <div class="activity-time">{{ lead.timestamp[:16] | replace('T', ' ') }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Parse lead data from server
+        const leads = {{ leads | tojson }};
+
+        // Calculate stats
+        const priority = leads.filter(l => l.score >= 8).length;
+        const nurture = leads.filter(l => l.score >= 5 && l.score < 8).length;
+        const redirect = leads.filter(l => l.score < 5).length;
+        const avgScore = leads.length ? (leads.reduce((s, l) => s + l.score, 0) / leads.length).toFixed(1) : '--';
+
+        document.getElementById('priorityLeads').textContent = priority;
+        document.getElementById('avgScore').textContent = avgScore;
+
+        // Score distribution chart
+        const scoreDist = Array(10).fill(0);
+        leads.forEach(l => { if (l.score >= 1 && l.score <= 10) scoreDist[l.score - 1]++; });
+
+        new Chart(document.getElementById('scoreChart'), {
+            type: 'bar',
+            data: {
+                labels: ['1','2','3','4','5','6','7','8','9','10'],
+                datasets: [{
+                    label: 'Leads',
+                    data: scoreDist,
+                    backgroundColor: scoreDist.map((_, i) =>
+                        i >= 7 ? '#10b981' : i >= 4 ? '#f59e0b' : '#ef4444'
+                    ),
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#6b6b80' } },
+                    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#6b6b80', stepSize: 1 } }
+                }
+            }
+        });
+
+        // Tier donut chart
+        new Chart(document.getElementById('tierChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Priority', 'Nurture', 'Redirect'],
+                datasets: [{
+                    data: [priority, nurture, redirect],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#a0a0b8', padding: 16, font: { size: 12 } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

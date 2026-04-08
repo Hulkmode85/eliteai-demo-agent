@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EliteAI — Get Started</title>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: #16161f;
+            --text: #f0f0f5;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6b6b80;
+            --accent: #6366f1;
+            --gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --border: rgba(255,255,255,0.06);
+            --success: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        }
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 48px; width: 500px; max-width: 90vw;
+            text-align: center;
+        }
+        .plan-name {
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
+            background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-weight: 700; margin-bottom: 12px;
+        }
+        h1 { font-size: 1.8rem; margin-bottom: 16px; }
+        .price { font-size: 2.5rem; font-weight: 800; margin-bottom: 8px; }
+        .price span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
+        .desc { color: var(--text-secondary); margin-bottom: 32px; line-height: 1.6; }
+        .features { text-align: left; margin: 0 auto 32px; max-width: 300px; }
+        .features li {
+            list-style: none; padding: 8px 0; color: var(--text-secondary); font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .features li::before { content: "\2713 "; color: var(--success); font-weight: 700; margin-right: 8px; }
+        .cta {
+            display: inline-block; padding: 14px 40px; background: var(--gradient);
+            color: white; border-radius: 10px; font-weight: 600; font-size: 1rem;
+            text-decoration: none; transition: 0.2s;
+        }
+        .cta:hover { opacity: 0.9; transform: translateY(-1px); }
+        .note { margin-top: 16px; font-size: 0.8rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="plan-name">{{ plan | upper }} PLAN</div>
+        <h1>Let's Get You Started</h1>
+        {% if plan == 'starter' %}
+        <div class="price">$1,500 <span>setup</span></div>
+        <div class="desc">+ $500/month maintenance. Your AI receptionist goes live in 7 days.</div>
+        <ul class="features">
+            <li>AI phone answering (business hours)</li>
+            <li>Appointment scheduling</li>
+            <li>Automated reminders</li>
+            <li>Basic intake automation</li>
+            <li>Monthly performance report</li>
+        </ul>
+        {% else %}
+        <div class="price">$2,500 <span>setup</span></div>
+        <div class="desc">+ $750/month maintenance. Full 24/7 AI automation suite.</div>
+        <ul class="features">
+            <li>24/7 AI phone and text answering</li>
+            <li>Smart scheduling with waitlist</li>
+            <li>No-show follow-up sequences</li>
+            <li>Insurance verification assist</li>
+            <li>Weekly optimization calls</li>
+        </ul>
+        {% endif %}
+        <a class="cta" href="mailto:hello@eliteaisolutions.com?subject=EliteAI {{ plan | title }} Plan — Ready to Start&body=Hi EliteAI team,%0A%0AI'd like to get started with the {{ plan | title }} plan.%0A%0AClinic name:%0AContact name:%0APhone:%0A%0AThanks!">
+            Book Onboarding Call
+        </a>
+        <div class="note">Stripe payments will be enabled shortly. Email us to get started now.</div>
+    </div>
+</body>
+</html>

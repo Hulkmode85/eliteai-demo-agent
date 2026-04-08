@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EliteAI — Payment Successful</title>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: #16161f;
+            --text: #f0f0f5;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6b6b80;
+            --gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --border: rgba(255,255,255,0.06);
+            --success: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        }
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 48px; width: 500px; max-width: 90vw;
+            text-align: center;
+        }
+        .checkmark {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: rgba(16,185,129,0.15); display: flex;
+            align-items: center; justify-content: center;
+            margin: 0 auto 24px; font-size: 2.5rem; color: var(--success);
+        }
+        h1 { font-size: 1.8rem; margin-bottom: 12px; }
+        .desc { color: var(--text-secondary); line-height: 1.7; margin-bottom: 32px; }
+        .steps { text-align: left; margin: 0 auto 32px; max-width: 400px; }
+        .step {
+            display: flex; gap: 16px; padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .step-num {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--gradient); display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+        }
+        .step-text { font-size: 0.9rem; color: var(--text-secondary); }
+        .step-text strong { color: var(--text); }
+        .cta {
+            display: inline-block; padding: 14px 40px; background: var(--gradient);
+            color: white; border-radius: 10px; font-weight: 600; text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="checkmark">&#10003;</div>
+        <h1>Payment Successful!</h1>
+        <div class="desc">Welcome to EliteAI. Your AI receptionist build starts now.</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-text"><strong>Today:</strong> We'll send you an onboarding questionnaire about your clinic, services, and brand voice.</div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-text"><strong>Days 1-3:</strong> We build and train your custom AI on your specific procedures, pricing, and policies.</div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-text"><strong>Days 4-5:</strong> Testing phase. You review AI responses and we fine-tune.</div>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-text"><strong>Days 6-7:</strong> Go live. Your AI starts handling real patient inquiries 24/7.</div>
+            </div>
+        </div>
+        <a class="cta" href="/">Back to Home</a>
+    </div>
+</body>
+</html>
