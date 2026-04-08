@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Patient Intake — Demo</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            color: white;
+            padding: 3rem 1.5rem 2.5rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 0.3rem 1rem;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: -1.5rem auto 2rem;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+
+        label .hint {
+            font-weight: 400;
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: #fff;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        textarea { resize: vertical; min-height: 100px; }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 0.5rem;
+        }
+
+        button[type="submit"]:hover { background: var(--primary-dark); }
+        button[type="submit"]:active { transform: scale(0.98); }
+        button[type="submit"]:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Result panel */
+        .result {
+            display: none;
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        .result.show { display: block; animation: fadeIn 0.4s ease; }
+
+        .result h3 { margin-bottom: 0.75rem; font-size: 1.1rem; }
+
+        .score-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: white;
+        }
+
+        .score-high { background: var(--success); }
+        .score-mid { background: var(--warning); }
+        .score-low { background: var(--danger); }
+
+        .result-meta {
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .result-email {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result-email .email-subject {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tier-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            margin-left: 0.5rem;
+        }
+
+        .tier-priority { color: var(--success); }
+        .tier-nurture { color: var(--warning); }
+        .tier-redirect { color: var(--muted); }
+
+        .powered-by {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 18px; height: 18px;
+            border: 2.5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="badge">AI-POWERED DEMO</div>
+        <h1>Smart Patient Intake</h1>
+        <p>AI qualifies every lead and responds instantly &mdash; 24/7.</p>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <form id="intakeForm">
+                <div class="row">
+                    <div class="form-group">
+                        <label>Clinic Name</label>
+                        <input type="text" name="clinic_name" placeholder="Bright Smile Dental" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Clinic Type</label>
+                        <select name="clinic_type">
+                            <option value="dental">Dental</option>
+                            <option value="chiropractic">Chiropractic</option>
+                            <option value="orthodontic">Orthodontic</option>
+                            <option value="physical therapy">Physical Therapy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>Patient Name</label>
+                        <input type="text" name="patient_name" placeholder="Sarah Johnson" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Inquiry Type</label>
+                        <select name="inquiry_type">
+                            <option value="emergency">Emergency / Pain</option>
+                            <option value="new_patient">New Patient</option>
+                            <option value="cleaning">Cleaning / Checkup</option>
+                            <option value="cosmetic">Cosmetic</option>
+                            <option value="insurance">Insurance Question</option>
+                            <option value="general">General Question</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>Email <span class="hint">(optional)</span></label>
+                        <input type="email" name="email" placeholder="sarah@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone <span class="hint">(optional)</span></label>
+                        <input type="tel" name="phone" placeholder="(555) 123-4567">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea name="message" placeholder="I've had a sharp pain in my lower left molar for 3 days. It's getting worse and I can barely eat. I have Delta Dental insurance. Can I get an emergency appointment this week?" required></textarea>
+                </div>
+
+                <button type="submit" id="submitBtn">Analyze & Respond with AI</button>
+            </form>
+
+            <div class="result" id="result">
+                <h3>
+                    AI Lead Score: <span class="score-badge" id="scoreBadge"></span>
+                    <span class="tier-label" id="tierLabel"></span>
+                </h3>
+                <div class="result-meta" id="scoreReason"></div>
+                <div class="result-email">
+                    <div class="email-subject" id="emailSubject"></div>
+                    <div id="emailBody"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="powered-by">
+            Powered by Claude AI &mdash; Responses generated in under 2 seconds
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('intakeForm');
+        const btn = document.getElementById('submitBtn');
+        const result = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Analyzing lead...';
+            result.classList.remove('show');
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const res = await fetch('/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+
+                const lead = await res.json();
+
+                if (lead.error) {
+                    alert(lead.error);
+                    return;
+                }
+
+                // Score badge
+                const badge = document.getElementById('scoreBadge');
+                badge.textContent = lead.score + '/10';
+                badge.className = 'score-badge ' +
+                    (lead.score >= 8 ? 'score-high' : lead.score >= 5 ? 'score-mid' : 'score-low');
+
+                // Tier label
+                const tier = document.getElementById('tierLabel');
+                const tierMap = {
+                    priority: ['PRIORITY — Book Now', 'tier-priority'],
+                    nurture: ['NURTURE — Follow Up', 'tier-nurture'],
+                    redirect: ['REDIRECT — Low Match', 'tier-redirect'],
+                };
+                const [tierText, tierClass] = tierMap[lead.response_tier] || ['', ''];
+                tier.textContent = tierText;
+                tier.className = 'tier-label ' + tierClass;
+
+                // Reason
+                document.getElementById('scoreReason').textContent = lead.score_reason;
+
+                // Email
+                document.getElementById('emailSubject').textContent = 'Subject: ' + lead.auto_response_subject;
+                document.getElementById('emailBody').textContent = lead.auto_response_body;
+
+                result.classList.add('show');
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Analyze & Respond with AI';
+            }
+        });
+    </script>
+</body>
+</html>
